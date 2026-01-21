@@ -1,0 +1,624 @@
+openapi: 3.0.3
+info:
+  title: Tarot App API
+  version: 0.1.0
+servers:
+  - url: https://api.example.com
+security:
+  - bearerAuth: []
+paths:
+  /auth/anonymous:
+    post:
+      security: []
+      summary: Create anonymous user
+      responses:
+        '200':
+          description: JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /auth/oauth:
+    post:
+      security: []
+      summary: OAuth sign-in (Apple/Google)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthRequest'
+      responses:
+        '200':
+          description: JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /master/fortune-types:
+    get:
+      summary: List fortune types
+      responses:
+        '200':
+          description: Fortune types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FortuneType'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /master/products:
+    get:
+      summary: List products
+      responses:
+        '200':
+          description: Products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /master/affiliate-links:
+    get:
+      summary: List affiliate links
+      responses:
+        '200':
+          description: Affiliate links
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AffiliateLink'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /life:
+    get:
+      summary: Get current life
+      responses:
+        '200':
+          description: Life status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifeStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /life/consume:
+    post:
+      summary: Consume life for no-desc draw
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LifeConsumeRequest'
+      responses:
+        '200':
+          description: Life status after consume
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifeStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /ads/reward/complete:
+    post:
+      summary: Complete rewarded ad
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdRewardRequest'
+      responses:
+        '200':
+          description: Life status after reward
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifeStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /readings/execute:
+    post:
+      summary: Execute a fortune
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteReadingRequest'
+      responses:
+        '200':
+          description: Reading result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecuteReadingResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /readings:
+    get:
+      summary: List readings
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - in: query
+          name: cursor
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reading list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /readings/{id}:
+    get:
+      summary: Get reading detail
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Reading detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reading'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /warnings/accept:
+    post:
+      summary: Accept warning for restricted fortune
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarningAcceptRequest'
+      responses:
+        '200':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /billing/verify/purchase:
+    post:
+      summary: Verify one-time purchase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseVerifyRequest'
+      responses:
+        '200':
+          description: Verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /billing/verify/subscription:
+    post:
+      summary: Verify subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionVerifyRequest'
+      responses:
+        '200':
+          description: Verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /billing/status:
+    get:
+      summary: Billing status
+      responses:
+        '200':
+          description: Billing status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /affiliate/click:
+    post:
+      summary: Track affiliate click
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AffiliateClickRequest'
+      responses:
+        '200':
+          description: Tracked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /consultation:
+    post:
+      summary: Request personal consultation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsultationRequest'
+      responses:
+        '200':
+          description: Received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    TooManyRequests:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+    OAuthRequest:
+      type: object
+      required: [provider, id_token]
+      properties:
+        provider:
+          type: string
+          enum: [apple, google]
+        id_token:
+          type: string
+    FortuneType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        name:
+          type: string
+        access_type_default:
+          type: string
+          enum: [free, life, subscription, one_time]
+        requires_warning:
+          type: boolean
+        description:
+          type: string
+          nullable: true
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        product_key:
+          type: string
+        fortune_type_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        price_cents:
+          type: integer
+        currency:
+          type: string
+        platform:
+          type: string
+        active:
+          type: boolean
+    AffiliateLink:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        url:
+          type: string
+        provider:
+          type: string
+        active:
+          type: boolean
+    LifeStatus:
+      type: object
+      properties:
+        current_life:
+          type: integer
+        max_life:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+    LifeConsumeRequest:
+      type: object
+      required: [fortune_type_key]
+      properties:
+        fortune_type_key:
+          type: string
+        reading_id:
+          type: string
+          format: uuid
+    AdRewardRequest:
+      type: object
+      required: [ad_provider, placement]
+      properties:
+        ad_provider:
+          type: string
+        placement:
+          type: string
+        reward_amount:
+          type: integer
+          default: 2
+    ExecuteReadingRequest:
+      type: object
+      required: [fortune_type_key]
+      properties:
+        fortune_type_key:
+          type: string
+        input_json:
+          type: object
+          additionalProperties: true
+    ExecuteReadingResponse:
+      type: object
+      properties:
+        reading_id:
+          type: string
+          format: uuid
+        result_json:
+          type: object
+          additionalProperties: true
+    Reading:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fortune_type_id:
+          type: string
+          format: uuid
+        access_type:
+          type: string
+        input_json:
+          type: object
+          additionalProperties: true
+        result_json:
+          type: object
+          additionalProperties: true
+        seed:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    ReadingList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reading'
+        next_cursor:
+          type: string
+          nullable: true
+    WarningAcceptRequest:
+      type: object
+      required: [fortune_type_key]
+      properties:
+        fortune_type_key:
+          type: string
+        ip:
+          type: string
+        user_agent:
+          type: string
+    PurchaseVerifyRequest:
+      type: object
+      required: [platform, receipt]
+      properties:
+        platform:
+          type: string
+          enum: [ios, android]
+        receipt:
+          type: string
+        product_key:
+          type: string
+    SubscriptionVerifyRequest:
+      type: object
+      required: [platform, receipt]
+      properties:
+        platform:
+          type: string
+          enum: [ios, android]
+        receipt:
+          type: string
+    BillingStatus:
+      type: object
+      properties:
+        subscription_active:
+          type: boolean
+        subscription_expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        ads_disabled:
+          type: boolean
+    AffiliateClickRequest:
+      type: object
+      required: [affiliate_link_id]
+      properties:
+        affiliate_link_id:
+          type: string
+          format: uuid
+        placement:
+          type: string
+    ConsultationRequest:
+      type: object
+      required: [contact_type, contact_value]
+      properties:
+        contact_type:
+          type: string
+          enum: [email, phone]
+        contact_value:
+          type: string
+        message:
+          type: string
+    OkResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
